@@ -1,0 +1,250 @@
+/* Estilos propios. La base (tipografía, formularios, botones, diálogos) es Pico CSS. */
+
+/* Se repite el selector de Pico para tener la misma especificidad y poder
+   sustituir su color principal por el verde de la aplicación */
+:root:not([data-theme="dark"]),
+[data-theme="light"] {
+  --pico-primary: #1a7f5a;
+  --pico-primary-background: #1a7f5a;
+  --pico-primary-border: #1a7f5a;
+  --pico-primary-hover: #146246;
+  --pico-primary-hover-background: #146246;
+  --pico-primary-hover-border: #146246;
+  --pico-primary-underline: rgb(26 127 90 / 0.5);
+  --pico-primary-focus: rgb(26 127 90 / 0.25);
+  --color-alta: #c0392b;
+  --color-media: #d68910;
+  --color-baja: #2e86c1;
+}
+
+.marca {
+  color: var(--pico-primary);
+}
+
+/* --- Estadísticas --- */
+
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-sectioning-background-color);
+}
+
+.caja strong {
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.caja.alerta strong {
+  color: var(--color-alta);
+}
+
+.origen {
+  display: block;
+  margin: 0.4rem 0 1.25rem;
+  color: var(--pico-muted-color);
+}
+
+/* --- Filtros --- */
+
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr) 2fr auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.filtros > * {
+  margin-bottom: 0;
+}
+
+/* --- Tareas --- */
+
+#lista-tareas {
+  margin-top: 1.25rem;
+}
+
+.tarea {
+  margin-bottom: 1rem;
+  border-left: 6px solid var(--color-media);
+}
+
+.tarea.prioridad-alta {
+  border-left-color: var(--color-alta);
+}
+
+.tarea.prioridad-baja {
+  border-left-color: var(--color-baja);
+}
+
+.tarea.hecha {
+  opacity: 0.6;
+}
+
+.tarea.hecha .cabecera-tarea strong {
+  text-decoration: line-through;
+}
+
+.tarea.vencida .fecha {
+  color: var(--color-alta);
+  font-weight: bold;
+}
+
+.cabecera-tarea {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.etiqueta-prioridad {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pico-muted-color);
+}
+
+.tarea p {
+  margin-bottom: 0.75rem;
+}
+
+.pie-tarea {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.acciones > * {
+  margin-bottom: 0;
+  width: auto;
+}
+
+.acciones select {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.acciones button {
+  padding: 0.35rem 0.8rem;
+}
+
+.vacio {
+  color: var(--pico-muted-color);
+}
+
+/* --- Login --- */
+
+.login {
+  max-width: 26rem;
+  margin: 3rem auto;
+}
+
+.texto-error {
+  display: block;
+  min-height: 1.25em;
+  margin-bottom: 0.5rem;
+  color: var(--color-alta);
+}
+
+/* --- Adjuntos --- */
+
+.adjuntos {
+  padding-left: 1rem;
+}
+
+.adjuntos li {
+  list-style: disc;
+}
+
+.subida {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.subida > * {
+  margin-bottom: 0;
+}
+
+.subida [type="submit"] {
+  padding: 0.5rem 1rem;
+}
+
+.subida button,
+.subida [type="submit"] {
+  width: auto;
+}
+
+button.enlace {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-alta);
+  font-size: 0.85em;
+  text-decoration: underline;
+  width: auto;
+}
+
+/* --- Diálogos --- */
+
+dialog footer button,
+dialog footer [type="submit"] {
+  width: auto;
+  margin-bottom: 0;
+}
+
+/* --- Pie y avisos --- */
+
+.pie {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--pico-muted-color);
+}
+
+#aviso {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--pico-border-radius);
+  background: #2c3e50;
+  color: #fff;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
+  z-index: 1000;
+  max-width: 90vw;
+}
+
+#aviso.error {
+  background: var(--color-alta);
+}
+
+/* --- Pantallas estrechas --- */
+
+@media (max-width: 768px) {
+  .estadisticas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+}

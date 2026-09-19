@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestor de tareas</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <!-- Configuración en tiempo de ejecución: se carga antes que la aplicación -->
+    <script src="./config.js"></script>
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body>
+    <header class="container">
+      <nav>
+        <ul>
+          <li><strong class="marca">✔ Gestor de tareas</strong></li>
+        </ul>
+        <ul id="zona-usuario"></ul>
+      </nav>
+    </header>
+
+    <main class="container">
+      <p id="cargando" aria-busy="true">Conectando con la API…</p>
+
+      <!-- Error de conexión con la API -->
+      <article id="vista-error" hidden>
+        <header><strong>No se puede usar la aplicación</strong></header>
+        <p id="texto-error"></p>
+        <footer><button id="reintentar" class="secondary">Reintentar</button></footer>
+      </article>
+
+      <!-- Inicio de sesión (solo si la API tiene LOGIN=true) -->
+      <article id="vista-login" class="login" hidden>
+        <header><strong>Iniciar sesión</strong></header>
+        <form id="formulario-login">
+          <label>
+            Usuario
+            <input name="usuario" autocomplete="username" required />
+          </label>
+          <label>
+            Contraseña
+            <input name="contrasena" type="password" autocomplete="current-password" required />
+          </label>
+          <small id="error-login" class="texto-error"></small>
+          <button type="submit">Entrar</button>
+        </form>
+      </article>
+
+      <!-- Tareas -->
+      <section id="vista-tareas" hidden>
+        <div id="estadisticas" class="estadisticas"></div>
+        <small id="origen-estadisticas" class="origen"></small>
+
+        <form id="filtros" class="filtros">
+          <select name="estado" aria-label="Filtrar por estado">
+            <option value="">Todos los estados</option>
+            <option value="PENDIENTE">Pendientes</option>
+            <option value="EN_CURSO">En curso</option>
+            <option value="HECHA">Hechas</option>
+          </select>
+          <select name="prioridad" aria-label="Filtrar por prioridad">
+            <option value="">Todas las prioridades</option>
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Media</option>
+            <option value="BAJA">Baja</option>
+          </select>
+          <input name="texto" type="search" placeholder="Buscar en el título" aria-label="Buscar" />
+          <button type="button" id="nueva-tarea">Nueva tarea</button>
+        </form>
+
+        <div id="lista-tareas"></div>
+      </section>
+    </main>
+
+    <footer class="container pie">
+      <small id="pie-info"></small>
+      <small><a href="#" id="ver-info">Ver datos del despliegue</a></small>
+    </footer>
+
+    <!-- Crear o editar una tarea -->
+    <dialog id="dialogo-tarea">
+      <article>
+        <header>
+          <button type="button" aria-label="Cerrar" rel="prev" data-cerrar></button>
+          <strong id="titulo-dialogo">Nueva tarea</strong>
+        </header>
+        <form id="formulario-tarea">
+          <label>
+            Título
+            <input name="titulo" maxlength="120" required />
+          </label>
+          <label>
+            Descripción
+            <textarea name="descripcion" rows="3" maxlength="2000"></textarea>
+          </label>
+          <div class="grid">
+            <label>
+              Prioridad
+              <select name="prioridad">
+                <option value="BAJA">Baja</option>
+                <option value="MEDIA" selected>Media</option>
+                <option value="ALTA">Alta</option>
+              </select>
+            </label>
+            <label>
+              Estado
+              <select name="estado">
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="EN_CURSO">En curso</option>
+                <option value="HECHA">Hecha</option>
+              </select>
+            </label>
+            <label>
+              Fecha límite
+              <input name="fechaLimite" type="date" />
+            </label>
+          </div>
+          <small id="error-tarea" class="texto-error"></small>
+        </form>
+
+        <!-- Los adjuntos solo se muestran al editar una tarea ya guardada -->
+        <section id="seccion-adjuntos" hidden>
+          <h6>Adjuntos</h6>
+          <ul id="lista-adjuntos" class="adjuntos"></ul>
+          <form id="formulario-adjunto" class="subida">
+            <input type="file" name="fichero" required aria-label="Fichero" />
+            <button type="submit" class="secondary">Subir</button>
+          </form>
+          <small class="origen">Máximo 5 MB por fichero.</small>
+        </section>
+
+        <footer>
+          <button type="button" class="secondary" data-cerrar>Cancelar</button>
+          <button type="submit" form="formulario-tarea">Guardar</button>
+        </footer>
+      </article>
+    </dialog>
+
+    <!-- Datos del despliegue (/api/info) -->
+    <dialog id="dialogo-info">
+      <article>
+        <header>
+          <button type="button" aria-label="Cerrar" rel="prev" data-cerrar></button>
+          <strong>Datos del despliegue</strong>
+        </header>
+        <table class="striped">
+          <tbody id="tabla-info"></tbody>
+        </table>
+        <footer><button type="button" data-cerrar>Cerrar</button></footer>
+      </article>
+    </dialog>
+
+    <div id="aviso" role="status" hidden></div>
+  </body>
+</html>

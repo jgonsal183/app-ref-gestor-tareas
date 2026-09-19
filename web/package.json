@@ -1,0 +1,21 @@
+{
+  "name": "gestor-tareas-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend del gestor de tareas (aplicación de referencia de DACSN)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "dependencies": {
+    "@picocss/pico": "2.1.1"
+  },
+  "devDependencies": {
+    "vite": "8.3.0"
+  }
+}

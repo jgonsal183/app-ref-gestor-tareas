@@ -1,0 +1,112 @@
+# =====================================================================
+# Gestor de tareas · Configuración
+#
+# Todo lo que cambia entre entornos se lee de VARIABLES DE ENTORNO.
+# La sintaxis ${VARIABLE:valor} usa "valor" si la variable no existe.
+# La tabla completa de variables está en el README.
+# =====================================================================
+
+app:
+  # Login de usuarios: false = todo el mundo trabaja como "invitado"
+  login: ${LOGIN:false}
+  # Si se indica, sustituye al arrancar la contraseña de los usuarios de ejemplo
+  demo-password: ${DEMO_PASSWORD:}
+  # Orígenes permitidos para CORS, separados por comas (solo si el frontend
+  # se sirve desde otro dominio, p. ej. un bucket S3)
+  cors-origins: ${CORS_ORIGINS:}
+
+  almacenamiento:
+    tipo: ${STORAGE:local}                     # local | s3
+    directorio: ${STORAGE_DIR:./datos/adjuntos}  # solo para "local"
+    bucket: ${S3_BUCKET:}                        # solo para "s3"
+    region: ${S3_REGION:}                        # vacío = la región del entorno
+
+  # Redis se activa solo si REDIS_HOST tiene valor
+  redis:
+    host: ${REDIS_HOST:}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+
+  # El correo se activa solo si MAIL_HOST tiene valor
+  correo:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:1025}
+    remitente: ${MAIL_FROM:tareas@dacsn.local}
+
+spring:
+  application:
+    name: gestor-tareas
+
+  # --- Base de datos ---------------------------------------------------
+  # El SGBD se deduce de la URL:
+  #   jdbc:postgresql://HOST:5432/tareas
+  #   jdbc:mariadb://HOST:3306/tareas
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tareas}
+    username: ${DB_USER:tareas}
+    password: ${DB_PASSWORD:tareas}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none          # el esquema lo crea Flyway, no Hibernate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+
+  flyway:
+    # {vendor} se sustituye por "postgresql" o "mariadb" según la URL
+    locations: classpath:db/migration/{vendor}
+
+  # --- Redis -----------------------------------------------------------
+  # La conexión con Redis se crea en RedisConfig solo si hay REDIS_HOST.
+  # Por eso se desactiva la autoconfiguración que la crearía siempre.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
+  cache:
+    redis:
+      time-to-live: 10m
+
+  # --- Ficheros adjuntos -----------------------------------------------
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+server:
+  port: ${SERVER_PORT:8080}
+  # Respeta las cabeceras X-Forwarded-* de nginx o del balanceador
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        name: TAREAS_SESION
+        http-only: true
+        same-site: strict
+
+# --- Actuator: estado de la aplicación ---------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-components: always   # muestra db, redis… sin detalles sensibles
+      probes:
+        enabled: true           # /actuator/health/liveness y /readiness
+  health:
+    mail:
+      enabled: false            # que un fallo del correo no marque la API como caída
+  info:
+    build:
+      enabled: true
+
+logging:
+  level:
+    es.iesalmunia.tareas: INFO

@@ -1,0 +1,6 @@
+# Los scripts de shell deben tener finales de línea LF aunque se clonen en Windows;
+# con CRLF, "./mvnw" falla en Linux y dentro de los contenedores.
+* text=auto
+*.sh   text eol=lf
+mvnw   text eol=lf
+*.cmd  text eol=crlf

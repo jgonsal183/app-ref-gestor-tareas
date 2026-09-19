@@ -1,0 +1,18 @@
+# Java / Maven
+api/target/
+api/datos/
+*.class
+
+# Node / Vite
+web/node_modules/
+web/dist/
+
+# Entorno y secretos
+.env
+*.pem
+
+# Editores y sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store

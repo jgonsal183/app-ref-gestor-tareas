@@ -1,0 +1,77 @@
+# Publica una release con la aplicación ya construida.
+#
+# Se ejecuta al subir una etiqueta de versión, por ejemplo:
+#     git tag v1.0.0
+#     git push origin v1.0.0
+#
+# La release incluye:
+#   - gestor-tareas-X.Y.Z.jar       la API, lista para "java -jar"
+#   - gestor-tareas-web-X.Y.Z.zip   el frontend construido (contenido de dist/)
+#   - SHA256SUMS                    sumas de comprobación de los dos ficheros
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write   # necesario para crear la release y subir los ficheros
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v7
+
+      - name: Obtener la versión a partir de la etiqueta (v1.2.0 → 1.2.0)
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      # --- API ------------------------------------------------------------
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven   # reutiliza las dependencias descargadas en ejecuciones anteriores
+
+      - name: Construir la API
+        working-directory: api
+        run: ./mvnw --batch-mode package -Drevision="$VERSION"
+
+      # --- Frontend -------------------------------------------------------
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Construir el frontend
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      # --- Publicación ----------------------------------------------------
+
+      - name: Preparar los ficheros de la release
+        run: |
+          mkdir salida
+          cp "api/target/gestor-tareas-$VERSION.jar" salida/
+          (cd web/dist && zip -r "../../salida/gestor-tareas-web-$VERSION.zip" .)
+          (cd salida && sha256sum * > SHA256SUMS)
+          ls -l salida
+
+      - name: Crear la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" salida/* \
+            --title "Gestor de tareas $VERSION" \
+            --generate-notes
