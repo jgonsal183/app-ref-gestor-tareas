@@ -1,0 +1,58 @@
+# Gestor de tareas · despliegue completo con Docker Compose (UD1 · A1.3)
+# Uso:  sudo docker compose up -d      (desde la carpeta que contiene este fichero)
+name: gestor-tareas
+
+services:
+
+  # Base de datos: lo que en la A1.2 se instalaba con apt y se preparaba con CREATE DATABASE,
+  # CREATE USER y GRANT. La imagen lo hace con estas variables la primera vez que arranca.
+  bd:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: tareas
+      MARIADB_USER: tareas
+      MARIADB_PASSWORD: Tareas.2026
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - datos-bd:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # API: el mismo .jar de la A1.2 (renombrado a gestor-tareas.jar), con Java 21 dentro de la imagen.
+  # Las variables son las de /etc/gestor-tareas/gestor-tareas.env.
+  api:
+    image: eclipse-temurin:21-jre
+    restart: unless-stopped
+    command: java -jar /app/gestor-tareas.jar
+    environment:
+      DB_URL: jdbc:mariadb://bd:3306/tareas
+      DB_USER: tareas
+      DB_PASSWORD: Tareas.2026
+      STORAGE_DIR: /datos/adjuntos
+    volumes:
+      - ./api:/app:ro
+      - adjuntos:/datos/adjuntos
+    depends_on:
+      bd:
+        condition: service_healthy
+
+  # Servidor web: el frontend y el proxy inverso hacia la API, como nginx en la fase 3.
+  # Es la única pieza accesible desde la red, por el puerto 80.
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+
+volumes:
+  datos-bd:
+  adjuntos:
